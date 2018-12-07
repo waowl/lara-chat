@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -19,10 +20,10 @@ class HomeController extends Controller
     /**
      * Show the application dashboard.
      *
-     * @return \Illuminate\Http\Response
+     * @return UserResource
      */
     public function index()
     {
-        return view('home');
+        return new UserResource(auth()->user());
     }
 }

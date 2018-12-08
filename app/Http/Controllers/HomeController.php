@@ -24,6 +24,6 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return new UserResource(auth()->user());
+        return view('home');
     }
 }

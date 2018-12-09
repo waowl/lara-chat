@@ -1,7 +1,8 @@
 <template>
     <div class="card card-default chat-box">
         <div class="card-header d-flex flex-row justify-content-between">
-            <p :class="{'text-danger': session_block}">User
+            <p :class="{'text-danger': session_block}">
+                <span>{{user.name}}</span>
             <b v-if="session_block">(Blocked)</b>
             </p>
             <div class="actions">
@@ -35,6 +36,9 @@
 
 <script>
     export default {
+        props: [
+            'user'
+        ],
         data(){
             return {
                 messages: [],

@@ -9,8 +9,8 @@
 
                             <div class="card-body">
                                 <ul class="list-group">
-                                    <li class="list-group-item" v-for="user in users" :key="user.id" @click="openChat(user)">
-                                        {{user.name}}
+                                    <li class="list-group-item" v-for="user in users" :key="user.id" >
+                                        <a href="" @click.prevent="openChat(user)">{{user.name}}</a>
                                         <div class="online" v-if="user.online"></div>
                                     </li>
                                 </ul>
@@ -88,6 +88,13 @@
                     this.users.forEach(u => {
                         u.id === user.id ? u.online = false : ''
                     })
+                })
+            Echo.channel('Chat')
+                .listen('SessionEvent', e => {
+                    let user =  this.users.find(user => {
+                        return user.id === e.session_by.id
+                    })
+                    user.session = e.session
                 })
         }
     }

@@ -90,11 +90,11 @@
                     })
                 })
             Echo.channel('Chat')
-                .listen('SessionEvent', e => {
+                .listen('SessionEvent', ev => {
                     let user =  this.users.find(user => {
-                        return user.id === e.session_by.id
+                        return user.id === ev.session_by.id
                     })
-                    user.session = e.session
+                    user.session = ev.session
                 })
         }
     }

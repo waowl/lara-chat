@@ -9,7 +9,10 @@
 
                             <div class="card-body">
                                 <ul class="list-group">
-                                    <li class="list-group-item" v-for="user in users" :key="user.id" @click="openChat(user)">{{user.name}}</li>
+                                    <li class="list-group-item" v-for="user in users" :key="user.id" @click="openChat(user)">
+                                        {{user.name}}
+                                        <div class="online" v-if="user.online"></div>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -60,14 +63,43 @@
                    })
             }
         },
-        mounted() {
-            console.log('Component mounted.')
-        },
         created() {
             axios.post('/get-friends')
                 .then(({data}) => {
                     this.users = data.data
                 })
+
+            Echo.join('Chat')
+                .here(users => {
+                    users.forEach(user => {
+                        this.users.forEach(u => {
+                             u.id === user.id ? u.online = true : u.online = false
+                        })
+                    } )
+
+                })
+                .joining(user => {
+
+                    this.users.forEach(u => {
+                        u.id === user.id ? u.online = true : u.online = false
+                    })
+                })
+                .leaving(user => {
+                    this.users.forEach(u => {
+                        u.id === user.id ? u.online = false : ''
+                    })
+                })
         }
     }
 </script>
+<style>
+    .online{
+        height: 10px;
+        width: 10px;
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        border-radius: 50%;
+        background-color: green;
+    }
+</style>

@@ -47,7 +47,9 @@
           openChat(user) {
              if (user.session) {
                  this.users.forEach((u) => {
-                     u.session.open = false
+                     if (u.session) {
+                        u.session.open = false
+                     }
                  })
                  user.session.open = true
              } else {

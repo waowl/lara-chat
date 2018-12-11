@@ -24,7 +24,7 @@
         </div>
 
         <div class="card-body  " v-chat-scroll>
-            <p  v-for="message in messages" :key="message.content">{{message.content}}</p>
+            <p :class="{'text-right': message.type == 0}" v-for="message in messages" :key="message.id">{{message.message}}</p>
         </div>
         <form class="card-footer" @submit.prevent="send">
             <div class="form-group">
@@ -50,8 +50,8 @@
             send() {
                 axios.post(`/session/${this.user.session.id}/send`, {content: this.message, to_user: this.user.id })
                     .then(({data}) => {
-                        console.log(data.content);
-                        this.messages.push(data)
+                        console.log(data);
+                        this.messages.push({message: data.content, type: 0, send_at: 'Just Now'})
                         this.message = ''
                     })
 
@@ -64,7 +64,16 @@
             },
             toggleBlock() {
                 this.session_block ? this.session_block = false : this.session_block = true
-            }
+            },
+            getMessages: function () {
+                axios.get(`/session/${this.user.session.id}/chats`)
+                    .then(({data}) =>{
+                        this.messages = data.data
+                })
+            },
+        },
+        created() {
+            this.getMessages()
         }
     }
 </script>
@@ -75,5 +84,8 @@
     }
     .card-body{
         overflow-y: scroll;
+    }
+    .receive{
+        float: right;
     }
 </style>

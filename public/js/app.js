@@ -57972,7 +57972,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         openChat: function openChat(user) {
             if (user.session) {
                 this.users.forEach(function (u) {
-                    u.session.open = false;
+                    if (u.session) {
+                        u.session.open = false;
+                    }
                 });
                 user.session.open = true;
             } else {
@@ -58108,7 +58110,7 @@ exports = module.exports = __webpack_require__(11)(false);
 
 
 // module
-exports.push([module.i, "\n.chat-box[data-v-3f20c7be]{\n    height: 400px;\n}\n.card-body[data-v-3f20c7be]{\n    overflow-y: scroll;\n}\n", ""]);
+exports.push([module.i, "\n.chat-box[data-v-3f20c7be]{\n    height: 400px;\n}\n.card-body[data-v-3f20c7be]{\n    overflow-y: scroll;\n}\n.receive[data-v-3f20c7be]{\n    float: right;\n}\n", ""]);
 
 // exports
 
@@ -58173,8 +58175,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             axios.post('/session/' + this.user.session.id + '/send', { content: this.message, to_user: this.user.id }).then(function (_ref) {
                 var data = _ref.data;
 
-                console.log(data.content);
-                _this.messages.push(data);
+                console.log(data);
+                _this.messages.push({ message: data.content, type: 0, send_at: 'Just Now' });
                 _this.message = '';
             });
         },
@@ -58186,7 +58188,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         toggleBlock: function toggleBlock() {
             this.session_block ? this.session_block = false : this.session_block = true;
+        },
+
+        getMessages: function getMessages() {
+            var _this2 = this;
+
+            axios.get('/session/' + this.user.session.id + '/chats').then(function (_ref2) {
+                var data = _ref2.data;
+
+                _this2.messages = data.data;
+            });
         }
+    },
+    created: function created() {
+        this.getMessages();
     }
 });
 
@@ -58290,9 +58305,11 @@ var render = function() {
         staticClass: "card-body  "
       },
       _vm._l(_vm.messages, function(message) {
-        return _c("p", { key: message.content }, [
-          _vm._v(_vm._s(message.content))
-        ])
+        return _c(
+          "p",
+          { key: message.id, class: { "text-right": message.type == 0 } },
+          [_vm._v(_vm._s(message.message))]
+        )
       })
     ),
     _vm._v(" "),

@@ -57971,8 +57971,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         openChat: function openChat(user) {
             if (user.session) {
-                this.users.forEach(function (user) {
-                    user.session.open = false;
+                this.users.forEach(function (u) {
+                    u.session.open = false;
                 });
                 user.session.open = true;
             } else {
@@ -57980,46 +57980,44 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }
         },
         createSession: function createSession(user) {
-            var _this = this;
-
             axios.post('/session/create', { user_id: user.id }).then(function (_ref) {
                 var data = _ref.data;
 
                 user.session = data.data;
-                _this.openChat(user);
+                user.session.open = true;
             });
         }
     },
     created: function created() {
-        var _this2 = this;
+        var _this = this;
 
         axios.post('/get-friends').then(function (_ref2) {
             var data = _ref2.data;
 
-            _this2.users = data.data;
+            _this.users = data.data;
         });
 
         Echo.join('Chat').here(function (users) {
             users.forEach(function (user) {
-                _this2.users.forEach(function (u) {
+                _this.users.forEach(function (u) {
                     u.id === user.id ? u.online = true : u.online = false;
                 });
             });
         }).joining(function (user) {
 
-            _this2.users.forEach(function (u) {
+            _this.users.forEach(function (u) {
                 u.id === user.id ? u.online = true : u.online = false;
             });
         }).leaving(function (user) {
-            _this2.users.forEach(function (u) {
+            _this.users.forEach(function (u) {
                 u.id === user.id ? u.online = false : '';
             });
         });
-        Echo.channel('Chat').listen('SessionEvent', function (e) {
-            var user = _this2.users.find(function (user) {
-                return user.id === e.session_by.id;
+        Echo.channel('Chat').listen('SessionEvent', function (ev) {
+            var user = _this.users.find(function (user) {
+                return user.id === ev.session_by.id;
             });
-            user.session = e.session;
+            user.session = ev.session;
         });
     }
 });
@@ -58170,9 +58168,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
     methods: {
         send: function send() {
-            var message = { 'body': this.message };
-            this.messages.push(message);
-            this.message = '';
+            var _this = this;
+
+            axios.post('/session/' + this.user.session.id + '/send', { content: this.message, to_user: this.user.id }).then(function (_ref) {
+                var data = _ref.data;
+
+                console.log(data.content);
+                _this.messages.push(data);
+                _this.message = '';
+            });
         },
         close: function close() {
             this.$emit('closed');
@@ -58286,7 +58290,9 @@ var render = function() {
         staticClass: "card-body  "
       },
       _vm._l(_vm.messages, function(message) {
-        return _c("p", { key: message.body }, [_vm._v(_vm._s(message.body))])
+        return _c("p", { key: message.content }, [
+          _vm._v(_vm._s(message.content))
+        ])
       })
     ),
     _vm._v(" "),

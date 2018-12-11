@@ -24,7 +24,7 @@
         </div>
 
         <div class="card-body  " v-chat-scroll>
-            <p  v-for="message in messages" :key="message.body">{{message.body}}</p>
+            <p  v-for="message in messages" :key="message.content">{{message.content}}</p>
         </div>
         <form class="card-footer" @submit.prevent="send">
             <div class="form-group">
@@ -48,9 +48,13 @@
         },
         methods: {
             send() {
-                let message = {'body': this.message}
-                this.messages.push(message)
-                this.message = ''
+                axios.post(`/session/${this.user.session.id}/send`, {content: this.message, to_user: this.user.id })
+                    .then(({data}) => {
+                        console.log(data.content);
+                        this.messages.push(data)
+                        this.message = ''
+                    })
+
             },
             close() {
                 this.$emit('closed')

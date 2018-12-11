@@ -20,3 +20,4 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 Route::post('/get-friends','HomeController@getFriends');
 Route::post('/session/create','SessionController@create');
+Route::post('/session/{session}/send','ChatController@send');

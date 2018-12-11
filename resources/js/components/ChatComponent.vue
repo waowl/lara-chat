@@ -46,8 +46,8 @@
           },
           openChat(user) {
              if (user.session) {
-                 this.users.forEach((user) => {
-                     user.session.open = false
+                 this.users.forEach((u) => {
+                     u.session.open = false
                  })
                  user.session.open = true
              } else {
@@ -59,7 +59,7 @@
                axios.post('/session/create', {user_id: user.id} )
                    .then(({data}) => {
                        user.session = data.data
-                       this.openChat(user)
+                       user.session.open = true
                    })
             }
         },

@@ -14,7 +14,7 @@ class AddReadAtToChats extends Migration
     public function up()
     {
         Schema::table('chats', function (Blueprint $table) {
-            $table->dateTime('read_at');
+            $table->dateTime('read_at')->nullable();
         });
     }
 

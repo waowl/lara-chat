@@ -9,9 +9,12 @@
 
                             <div class="card-body">
                                 <ul class="list-group">
-                                    <li class="list-group-item" v-for="user in users" :key="user.id" >
+                                    <li class="list-group-item d-flex justify-content-between" v-for="user in users" :key="user.id" >
                                         <a href="" @click.prevent="openChat(user)">{{user.name}}</a>
-                                        <div class="online" v-if="user.online"></div>
+                                        <div class="info">
+                                            <span v-if="hasUnread(user)" class="badge badge-danger mr-2">{{user.session.unread_count}}</span>
+                                            <span class="online" v-if="user.online"></span>
+                                        </div>
                                     </li>
                                 </ul>
                             </div>
@@ -41,6 +44,9 @@
             }
         },
         methods: {
+            hasUnread(user) {
+                return    (user.session && user.session.unread_count != 0 )
+            },
           closeChat(user) {
               user.session.open = false
           },
@@ -51,6 +57,7 @@
                         u.session.open = false
                      }
                  })
+                 user.session.unread_count = 0
                  user.session.open = true
              } else {
                  this.createSession(user)
@@ -69,6 +76,16 @@
             axios.post('/get-friends')
                 .then(({data}) => {
                     this.users = data.data
+                    this.users.forEach(user => {
+                        if (user.session) {
+                            Echo.private(`Chat.${user.session.id}`)
+                                .listen('PrivateChannelEvent', ev => {
+                                    if (!user.session.open) {
+                                        user.session.unread_count++
+                                    }
+                                })
+                        }
+                    })
                 })
 
             Echo.join('Chat')
@@ -103,12 +120,17 @@
 </script>
 <style>
     .online{
+        margin-top: 5px;
         height: 10px;
         width: 10px;
-        position: absolute;
-        right: 20px;
-        top: 20px;
+        margin-top: 5px;
+        display: block;
         border-radius: 50%;
         background-color: green;
+    }
+    .info{
+        display: flex;
+        align-items: flex-start;
+
     }
 </style>

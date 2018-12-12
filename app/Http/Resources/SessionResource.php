@@ -9,16 +9,17 @@ class SessionResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return array
      */
     public function toArray($request)
     {
         return [
-          'id' => $this->id,
-          'open' => false,
-          'user1_id' => $this->user1_id,
-          'user2_id' => $this->user2_id,
+            'id' => $this->id,
+            'open' => false,
+            'user1_id' => $this->user1_id,
+            'user2_id' => $this->user2_id,
+            'unread_count' => $this->chats->where('read_at',null)->where('type', 0)->where('user_id', '!=', auth()->user()->id)->count()
         ];
     }
 }

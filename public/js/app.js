@@ -57876,7 +57876,7 @@ exports = module.exports = __webpack_require__(11)(false);
 
 
 // module
-exports.push([module.i, "\n.online{\n    height: 10px;\n    width: 10px;\n    position: absolute;\n    right: 20px;\n    top: 20px;\n    border-radius: 50%;\n    background-color: green;\n}\n", ""]);
+exports.push([module.i, "\n.online{\n    margin-top: 5px;\n    height: 10px;\n    width: 10px;\n    margin-top: 5px;\n    display: block;\n    border-radius: 50%;\n    background-color: green;\n}\n.info{\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    -webkit-box-align: start;\n        -ms-flex-align: start;\n            align-items: flex-start;\n}\n", ""]);
 
 // exports
 
@@ -57952,6 +57952,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -57966,6 +57969,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
 
     methods: {
+        hasUnread: function hasUnread(user) {
+            return user.session && user.session.unread_count != 0;
+        },
         closeChat: function closeChat(user) {
             user.session.open = false;
         },
@@ -57976,6 +57982,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                         u.session.open = false;
                     }
                 });
+                user.session.unread_count = 0;
                 user.session.open = true;
             } else {
                 this.createSession(user);
@@ -57997,6 +58004,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var data = _ref2.data;
 
             _this.users = data.data;
+            _this.users.forEach(function (user) {
+                if (user.session) {
+                    Echo.private('Chat.' + user.session.id).listen('PrivateChannelEvent', function (ev) {
+                        if (!user.session.open) {
+                            user.session.unread_count++;
+                        }
+                    });
+                }
+            });
         });
 
         Echo.join('Chat').here(function (users) {
@@ -58418,7 +58434,11 @@ var render = function() {
                   _vm._l(_vm.users, function(user) {
                     return _c(
                       "li",
-                      { key: user.id, staticClass: "list-group-item" },
+                      {
+                        key: user.id,
+                        staticClass:
+                          "list-group-item d-flex justify-content-between"
+                      },
                       [
                         _c(
                           "a",
@@ -58434,9 +58454,19 @@ var render = function() {
                           [_vm._v(_vm._s(user.name))]
                         ),
                         _vm._v(" "),
-                        user.online
-                          ? _c("div", { staticClass: "online" })
-                          : _vm._e()
+                        _c("div", { staticClass: "info" }, [
+                          _vm.hasUnread(user)
+                            ? _c(
+                                "span",
+                                { staticClass: "badge badge-danger mr-2" },
+                                [_vm._v(_vm._s(user.session.unread_count))]
+                              )
+                            : _vm._e(),
+                          _vm._v(" "),
+                          user.online
+                            ? _c("span", { staticClass: "online" })
+                            : _vm._e()
+                        ])
                       ]
                     )
                   })

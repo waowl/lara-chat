@@ -48,12 +48,14 @@
         },
         methods: {
             send() {
-                axios.post(`/session/${this.user.session.id}/send`, {content: this.message, to_user: this.user.id })
-                    .then(({data}) => {
-                        console.log(data);
-                        this.messages.push({message: data.content, type: 0, send_at: 'Just Now'})
-                        this.message = ''
-                    })
+                if(this.message) {
+                     axios.post(`/session/${this.user.session.id}/send`, {content: this.message, to_user: this.user.id })
+                        .then(({data}) => {
+                            console.log(data);
+                            this.messages.push({message: data.content, type: 0, send_at: 'Just Now'})
+                            this.message = ''
+                        })
+                }
 
             },
             close() {
@@ -74,6 +76,10 @@
         },
         created() {
             this.getMessages()
+            Echo.private(`Chat.${this.user.session.id}`)
+                .listen('PrivateChannelEvent', ev => {
+                    this.messages.push({message: ev.content, type: 1})
+                })
         }
     }
 </script>

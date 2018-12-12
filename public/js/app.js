@@ -58172,13 +58172,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         send: function send() {
             var _this = this;
 
-            axios.post('/session/' + this.user.session.id + '/send', { content: this.message, to_user: this.user.id }).then(function (_ref) {
-                var data = _ref.data;
+            if (this.message) {
+                axios.post('/session/' + this.user.session.id + '/send', { content: this.message, to_user: this.user.id }).then(function (_ref) {
+                    var data = _ref.data;
 
-                console.log(data);
-                _this.messages.push({ message: data.content, type: 0, send_at: 'Just Now' });
-                _this.message = '';
-            });
+                    console.log(data);
+                    _this.messages.push({ message: data.content, type: 0, send_at: 'Just Now' });
+                    _this.message = '';
+                });
+            }
         },
         close: function close() {
             this.$emit('closed');
@@ -58201,7 +58203,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
     },
     created: function created() {
+        var _this3 = this;
+
         this.getMessages();
+        Echo.private('Chat.' + this.user.session.id).listen('PrivateChannelEvent', function (ev) {
+            _this3.messages.push({ message: ev.content, type: 1 });
+        });
     }
 });
 

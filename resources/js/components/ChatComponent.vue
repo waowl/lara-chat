@@ -70,7 +70,17 @@
                        user.session = data.data
                        user.session.open = true
                    })
+            },
+            listenForEverySession(user) {
+                Echo.private(`Chat.${user.session.id}`)
+                    .listen('PrivateChannelEvent', ev => {
+                        console.log('got ' + ev +" count :" + user.session.unread_count);
+                        user.session.open ? "" : user.session.unread_count++
+                        console.log('new count ' + user.session.unread_count);
+
+                    })
             }
+
         },
         created() {
             axios.post('/get-friends')
@@ -78,12 +88,7 @@
                     this.users = data.data
                     this.users.forEach(user => {
                         if (user.session) {
-                            Echo.private(`Chat.${user.session.id}`)
-                                .listen('PrivateChannelEvent', ev => {
-                                    if (!user.session.open) {
-                                        user.session.unread_count++
-                                    }
-                                })
+                            this.listenForEverySession(user)
                         }
                     })
                 })
@@ -92,13 +97,12 @@
                 .here(users => {
                     users.forEach(user => {
                         this.users.forEach(u => {
-                             u.id === user.id ? u.online = true : u.online = false
+                             u.id == user.id ? u.online = true : ""
                         })
                     } )
 
                 })
                 .joining(user => {
-
                     this.users.forEach(u => {
                         u.id === user.id ? u.online = true : u.online = false
                     })
@@ -110,10 +114,9 @@
                 })
             Echo.channel('Chat')
                 .listen('SessionEvent', ev => {
-                    let user =  this.users.find(user => {
-                        return user.id === ev.session_by.id
-                    })
+                    let user =  this.users.find(user => user.id == ev.session_by.id)
                     user.session = ev.session
+                    this.listenForEverySession(user)
                 })
         }
     }

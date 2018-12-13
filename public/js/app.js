@@ -57995,6 +57995,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 user.session = data.data;
                 user.session.open = true;
             });
+        },
+        listenForEverySession: function listenForEverySession(user) {
+            Echo.private('Chat.' + user.session.id).listen('PrivateChannelEvent', function (ev) {
+                console.log('got ' + ev + " count :" + user.session.unread_count);
+                user.session.open ? "" : user.session.unread_count++;
+                console.log('new count ' + user.session.unread_count);
+            });
         }
     },
     created: function created() {
@@ -58006,11 +58013,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             _this.users = data.data;
             _this.users.forEach(function (user) {
                 if (user.session) {
-                    Echo.private('Chat.' + user.session.id).listen('PrivateChannelEvent', function (ev) {
-                        if (!user.session.open) {
-                            user.session.unread_count++;
-                        }
-                    });
+                    _this.listenForEverySession(user);
                 }
             });
         });
@@ -58018,11 +58021,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         Echo.join('Chat').here(function (users) {
             users.forEach(function (user) {
                 _this.users.forEach(function (u) {
-                    u.id === user.id ? u.online = true : u.online = false;
+                    u.id == user.id ? u.online = true : "";
                 });
             });
         }).joining(function (user) {
-
             _this.users.forEach(function (u) {
                 u.id === user.id ? u.online = true : u.online = false;
             });
@@ -58033,9 +58035,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         });
         Echo.channel('Chat').listen('SessionEvent', function (ev) {
             var user = _this.users.find(function (user) {
-                return user.id === ev.session_by.id;
+                return user.id == ev.session_by.id;
             });
             user.session = ev.session;
+            _this.listenForEverySession(user);
         });
     }
 });
@@ -58216,13 +58219,22 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
                 _this2.messages = data.data;
             });
+        },
+        read: function read() {
+            axios.get('/session/' + this.user.session.id + '/read').then(function (_ref3) {
+                var data = _ref3.data;
+
+                console.log(dawebta);
+            });
         }
     },
     created: function created() {
         var _this3 = this;
 
+        this.read();
         this.getMessages();
         Echo.private('Chat.' + this.user.session.id).listen('PrivateChannelEvent', function (ev) {
+            _this3.read();
             _this3.messages.push({ message: ev.content, type: 1 });
         });
     }

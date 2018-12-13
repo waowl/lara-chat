@@ -73,11 +73,19 @@
                         this.messages = data.data
                 })
             },
+            read() {
+                axios.get(`/session/${this.user.session.id}/read`)
+                    .then(({data}) =>{
+                        console.log(dawebta);
+                    })
+            }
         },
         created() {
+            this.read()
             this.getMessages()
             Echo.private(`Chat.${this.user.session.id}`)
                 .listen('PrivateChannelEvent', ev => {
+                    this.read()
                     this.messages.push({message: ev.content, type: 1})
                 })
         }

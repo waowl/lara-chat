@@ -9,15 +9,16 @@ class ChatResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return array
      */
     public function toArray($request)
     {
         return [
-          'message' =>  $this->message['content'],
-          'id' => $this->id,
-          'type' => $this->type,
+            'message' => $this->message['content'],
+            'id' => $this->id,
+            'type' => $this->type,
+            'read_at' => $this->read_at != null ? $this->read_at->diffForHumans() : "",
           'send_at' => $this->created_at->diffForHumans()
         ];
     }

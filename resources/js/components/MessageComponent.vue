@@ -24,7 +24,17 @@
         </div>
 
         <div class="card-body  " v-chat-scroll>
-            <p :class="{'text-right': message.type == 0}" v-for="message in messages" :key="message.id">{{message.message}}</p>
+            <p :class="{'text-right': message.type == 0,  'text-success': (message.read_at != null && message.type == 0)}" v-for="message in messages" :key="message.id">
+                {{message.message}}
+            <br>
+            <span class="text-danger" v-if="message.read_at == null && message.type == 0">
+                <i class="far fa-clock"></i>
+            </span>
+            <span v-else>
+                <small>{{message.read_at}}</small>
+            </span>
+            </p>
+
         </div>
         <form class="card-footer" @submit.prevent="send">
             <div class="form-group">
@@ -52,7 +62,7 @@
                      axios.post(`/session/${this.user.session.id}/send`, {content: this.message, to_user: this.user.id })
                         .then(({data}) => {
                             console.log(data);
-                            this.messages.push({message: data.content, type: 0, send_at: 'Just Now'})
+                            this.messages.push({id:data, message: this.message, type: 0, send_at: 'Just Now', read_at: null})
                             this.message = ''
                         })
                 }
@@ -76,7 +86,7 @@
             read() {
                 axios.get(`/session/${this.user.session.id}/read`)
                     .then(({data}) =>{
-                        console.log(dawebta);
+                        console.log(data);
                     })
             }
         },
@@ -85,9 +95,16 @@
             this.getMessages()
             Echo.private(`Chat.${this.user.session.id}`)
                 .listen('PrivateChannelEvent', ev => {
-                    this.read()
+                    this.user.session.open ? this.read() : ''
                     this.messages.push({message: ev.content, type: 1})
                 })
+                .listen('MessageReadEvent' ,
+                ev => {
+                   this.messages.forEach(message => {
+                       message.id == ev.chat.id ? message.read_at = ev.chat.read_at : ""
+                   })
+                }
+                )
         }
     }
 </script>

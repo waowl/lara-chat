@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Chat extends Model
 {
     protected $guarded = [];
+    protected $dates= [
+        'read_at'
+    ];
 
     public function message()
     {

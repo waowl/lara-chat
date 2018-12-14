@@ -14401,10 +14401,10 @@ window._ = __webpack_require__(17);
  */
 
 try {
-  window.Popper = __webpack_require__(3).default;
-  window.$ = window.jQuery = __webpack_require__(4);
+    window.Popper = __webpack_require__(3).default;
+    window.$ = window.jQuery = __webpack_require__(4);
 
-  __webpack_require__(19);
+    __webpack_require__(19);
 } catch (e) {}
 
 /**
@@ -14426,9 +14426,9 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 var token = document.head.querySelector('meta[name="csrf-token"]');
 
 if (token) {
-  window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+    window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
 } else {
-  console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
+    console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
 }
 
 /**
@@ -14441,11 +14441,11 @@ if (token) {
 window.Pusher = __webpack_require__(40);
 
 window.Echo = new __WEBPACK_IMPORTED_MODULE_0_laravel_echo__["a" /* default */]({
-  broadcaster: 'pusher',
-  key: '153e53ae2f88bd851a37',
+    broadcaster: 'pusher',
+    key: '153e53ae2f88bd851a37',
 
-  cluster: 'eu',
-  encrypted: true
+    cluster: 'eu',
+    encrypted: true
 });
 
 /***/ }),
@@ -58176,6 +58176,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['user'],
@@ -58196,7 +58206,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     var data = _ref.data;
 
                     console.log(data);
-                    _this.messages.push({ message: data.content, type: 0, send_at: 'Just Now' });
+                    _this.messages.push({ id: data, message: _this.message, type: 0, send_at: 'Just Now', read_at: null });
                     _this.message = '';
                 });
             }
@@ -58224,7 +58234,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             axios.get('/session/' + this.user.session.id + '/read').then(function (_ref3) {
                 var data = _ref3.data;
 
-                console.log(dawebta);
+                console.log(data);
             });
         }
     },
@@ -58234,8 +58244,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.read();
         this.getMessages();
         Echo.private('Chat.' + this.user.session.id).listen('PrivateChannelEvent', function (ev) {
-            _this3.read();
+            _this3.user.session.open ? _this3.read() : '';
             _this3.messages.push({ message: ev.content, type: 1 });
+        }).listen('MessageReadEvent', function (ev) {
+            _this3.messages.forEach(function (message) {
+                message.id == ev.chat.id ? message.read_at = ev.chat.read_at : "";
+            });
         });
     }
 });
@@ -58342,8 +58356,23 @@ var render = function() {
       _vm._l(_vm.messages, function(message) {
         return _c(
           "p",
-          { key: message.id, class: { "text-right": message.type == 0 } },
-          [_vm._v(_vm._s(message.message))]
+          {
+            key: message.id,
+            class: {
+              "text-right": message.type == 0,
+              "text-success": message.read_at != null && message.type == 0
+            }
+          },
+          [
+            _vm._v("\n            " + _vm._s(message.message) + "\n        "),
+            _c("br"),
+            _vm._v(" "),
+            message.read_at == null && message.type == 0
+              ? _c("span", { staticClass: "text-danger" }, [
+                  _c("i", { staticClass: "far fa-clock" })
+                ])
+              : _c("span", [_c("small", [_vm._v(_vm._s(message.read_at))])])
+          ]
         )
       })
     ),

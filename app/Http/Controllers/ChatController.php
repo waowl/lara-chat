@@ -46,5 +46,10 @@ class ChatController extends Controller {
         $chat->update(['read_at' => Carbon::now()]);
     }
 
-
+    public function clear(Session $session)
+    {
+        $session->clearChats();
+        $session->chats->count() == 0 ? $session->clearMessages() : '';
+        return response('cleared', 200);
+    }
 }

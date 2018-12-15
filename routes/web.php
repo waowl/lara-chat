@@ -23,3 +23,4 @@ Route::post('/session/create','SessionController@create');
 Route::post('/session/{session}/send','ChatController@send');
 Route::get('/session/{session}/chats','ChatController@getChats');
 Route::get('/session/{session}/read','ChatController@read');
+Route::get('/session/{session}/clear','ChatController@clear');

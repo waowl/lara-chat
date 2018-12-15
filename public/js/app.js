@@ -58129,7 +58129,7 @@ exports = module.exports = __webpack_require__(11)(false);
 
 
 // module
-exports.push([module.i, "\n.chat-box[data-v-3f20c7be]{\n    height: 400px;\n}\n.card-body[data-v-3f20c7be]{\n    overflow-y: scroll;\n}\n.receive[data-v-3f20c7be]{\n    float: right;\n}\n", ""]);
+exports.push([module.i, "\n.chat-box[data-v-3f20c7be] {\n    height: 400px;\n}\n.card-body[data-v-3f20c7be] {\n    overflow-y: scroll;\n}\n.receive[data-v-3f20c7be] {\n    float: right;\n}\n", ""]);
 
 // exports
 
@@ -58140,6 +58140,8 @@ exports.push([module.i, "\n.chat-box[data-v-3f20c7be]{\n    height: 400px;\n}\n.
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
 //
 //
 //
@@ -58206,7 +58208,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     var data = _ref.data;
 
                     console.log(data);
-                    _this.messages.push({ id: data, message: _this.message, type: 0, send_at: 'Just Now', read_at: null });
+                    _this.messages.push({
+                        id: data,
+                        message: _this.message,
+                        type: 0,
+                        send_at: 'Just Now',
+                        read_at: null
+                    });
                     _this.message = '';
                 });
             }
@@ -58215,19 +58223,23 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             this.$emit('closed');
         },
         clear: function clear() {
-            this.messages = [];
+            var _this2 = this;
+
+            axios.get('/session/' + this.user.session.id + '/clear').then(function (res) {
+                _this2.messages = [];
+            });
         },
         toggleBlock: function toggleBlock() {
             this.session_block ? this.session_block = false : this.session_block = true;
         },
 
         getMessages: function getMessages() {
-            var _this2 = this;
+            var _this3 = this;
 
             axios.get('/session/' + this.user.session.id + '/chats').then(function (_ref2) {
                 var data = _ref2.data;
 
-                _this2.messages = data.data;
+                _this3.messages = data.data;
             });
         },
         read: function read() {
@@ -58239,15 +58251,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
     },
     created: function created() {
-        var _this3 = this;
+        var _this4 = this;
 
         this.read();
         this.getMessages();
         Echo.private('Chat.' + this.user.session.id).listen('PrivateChannelEvent', function (ev) {
-            _this3.user.session.open ? _this3.read() : '';
-            _this3.messages.push({ message: ev.content, type: 1 });
+            _this4.user.session.open ? _this4.read() : '';
+            _this4.messages.push({ message: ev.content, type: 1 });
         }).listen('MessageReadEvent', function (ev) {
-            _this3.messages.forEach(function (message) {
+            _this4.messages.forEach(function (message) {
                 message.id == ev.chat.id ? message.read_at = ev.chat.read_at : "";
             });
         });
@@ -58364,7 +58376,9 @@ var render = function() {
             }
           },
           [
-            _vm._v("\n            " + _vm._s(message.message) + "\n        "),
+            _vm._v(
+              "\n            " + _vm._s(message.message) + "\n            "
+            ),
             _c("br"),
             _vm._v(" "),
             message.read_at == null && message.type == 0

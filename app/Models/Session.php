@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\UnauthorizedException;
 
 class Session extends Model
 {
@@ -26,5 +27,22 @@ class Session extends Model
     public function clearMessages()
     {
         $this->messages()->delete();
+    }
+
+    public function block()
+    {
+        $this->blocked = true;
+        $this->blocked_id = auth()->id();
+        $this->save();
+    }
+
+    public function unblock()
+    {
+        if ($this->blocked_id != auth()->id()) {
+            throw new UnauthorizedException();
+        }
+        $this->blocked = false;
+        $this->blocked_id = null;
+        $this->save();
     }
 }

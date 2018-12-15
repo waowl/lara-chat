@@ -1,17 +1,17 @@
 <template>
     <div class="card card-default chat-box">
         <div class="card-header d-flex flex-row justify-content-between">
-            <p :class="{'text-danger': session_block}">
+            <p :class="{'text-danger': this.user.session.blocked}">
                 <span>{{user.name}}</span>
-                <b v-if="session_block">(Blocked)</b>
+                <b v-if="this.user.session.blocked">(Blocked)</b>
             </p>
             <div class="actions">
                 <a href="" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" a>
                     <i class="fas fa-ellipsis-h mr-4"></i>
                 </a>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                    <a class="dropdown-item" v-if="!session_block" href="#" @click.prevent="toggleBlock">Block</a>
-                    <a v-else class="dropdown-item" href="#" @click.prevent="toggleBlock">Unblock</a>
+                    <a v-if="this.user.session.blocked && can"  class="dropdown-item" href="#" @click.prevent="unblock">Unblock</a>
+                    <a class="dropdown-item" v-else href="#" @click.prevent="block">Block</a>
                     <a class="dropdown-item" href="#" @click.prevent="clear">Clear Chat</a>
                 </div>
 
@@ -40,7 +40,7 @@
         <form class="card-footer" @submit.prevent="send">
             <div class="form-group">
                 <input type="text" v-model="message" class="form-control" placeholder="Enter message"
-                       :disabled="session_block">
+                       :disabled="this.user.session.blocked">
             </div>
         </form>
     </div>
@@ -55,10 +55,15 @@
             return {
                 messages: [],
                 message: '',
-                session_block: false
             }
         },
+        computed: {
+            can () {
+                return this.user.session.blocked_id === auth.id
+            },
+        },
         methods: {
+
             send() {
                 if (this.message) {
                     axios.post(`/session/${this.user.session.id}/send`, {content: this.message, to_user: this.user.id})
@@ -85,8 +90,18 @@
                         this.messages = []
                     })
             },
-            toggleBlock() {
-                this.session_block ? this.session_block = false : this.session_block = true
+            block() {
+              axios.post(`/session/${this.user.session.id}/block`)
+                  .then(res=> {
+                    this.user.session.blocked = true
+                  })
+            },
+            unblock() {
+                axios.post(`/session/${this.user.session.id}/unblock`)
+                    .then(res=> {
+                        this.user.session.blocked = false
+
+                    })
             },
             getMessages: function () {
                 axios.get(`/session/${this.user.session.id}/chats`)

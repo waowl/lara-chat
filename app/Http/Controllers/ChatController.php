@@ -52,4 +52,5 @@ class ChatController extends Controller {
         $session->chats->count() == 0 ? $session->clearMessages() : '';
         return response('cleared', 200);
     }
+
 }

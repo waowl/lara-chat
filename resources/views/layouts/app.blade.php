@@ -78,5 +78,10 @@
             @yield('content')
         </main>
     </div>
+    @auth
+        <script>
+            window.auth = @json(\Illuminate\Support\Facades\Auth::user())
+        </script>
+     @endauth
 </body>
 </html>

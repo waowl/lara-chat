@@ -58194,11 +58194,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     data: function data() {
         return {
             messages: [],
-            message: '',
-            session_block: false
+            message: ''
         };
     },
 
+    computed: {
+        can: function can() {
+            return this.user.session.blocked_id === auth.id;
+        }
+    },
     methods: {
         send: function send() {
             var _this = this;
@@ -58229,17 +58233,28 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 _this2.messages = [];
             });
         },
-        toggleBlock: function toggleBlock() {
-            this.session_block ? this.session_block = false : this.session_block = true;
+        block: function block() {
+            var _this3 = this;
+
+            axios.post('/session/' + this.user.session.id + '/block').then(function (res) {
+                _this3.user.session.blocked = true;
+            });
+        },
+        unblock: function unblock() {
+            var _this4 = this;
+
+            axios.post('/session/' + this.user.session.id + '/unblock').then(function (res) {
+                _this4.user.session.blocked = false;
+            });
         },
 
         getMessages: function getMessages() {
-            var _this3 = this;
+            var _this5 = this;
 
             axios.get('/session/' + this.user.session.id + '/chats').then(function (_ref2) {
                 var data = _ref2.data;
 
-                _this3.messages = data.data;
+                _this5.messages = data.data;
             });
         },
         read: function read() {
@@ -58251,15 +58266,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
     },
     created: function created() {
-        var _this4 = this;
+        var _this6 = this;
 
         this.read();
         this.getMessages();
         Echo.private('Chat.' + this.user.session.id).listen('PrivateChannelEvent', function (ev) {
-            _this4.user.session.open ? _this4.read() : '';
-            _this4.messages.push({ message: ev.content, type: 1 });
+            _this6.user.session.open ? _this6.read() : '';
+            _this6.messages.push({ message: ev.content, type: 1 });
         }).listen('MessageReadEvent', function (ev) {
-            _this4.messages.forEach(function (message) {
+            _this6.messages.forEach(function (message) {
                 message.id == ev.chat.id ? message.read_at = ev.chat.read_at : "";
             });
         });
@@ -58279,10 +58294,10 @@ var render = function() {
       "div",
       { staticClass: "card-header d-flex flex-row justify-content-between" },
       [
-        _c("p", { class: { "text-danger": _vm.session_block } }, [
+        _c("p", { class: { "text-danger": this.user.session.blocked } }, [
           _c("span", [_vm._v(_vm._s(_vm.user.name))]),
           _vm._v(" "),
-          _vm.session_block ? _c("b", [_vm._v("(Blocked)")]) : _vm._e()
+          this.user.session.blocked ? _c("b", [_vm._v("(Blocked)")]) : _vm._e()
         ]),
         _vm._v(" "),
         _c("div", { staticClass: "actions" }, [
@@ -58295,7 +58310,7 @@ var render = function() {
               attrs: { "aria-labelledby": "dropdownMenuLink" }
             },
             [
-              !_vm.session_block
+              this.user.session.blocked && _vm.can
                 ? _c(
                     "a",
                     {
@@ -58304,11 +58319,11 @@ var render = function() {
                       on: {
                         click: function($event) {
                           $event.preventDefault()
-                          return _vm.toggleBlock($event)
+                          return _vm.unblock($event)
                         }
                       }
                     },
-                    [_vm._v("Block")]
+                    [_vm._v("Unblock")]
                   )
                 : _c(
                     "a",
@@ -58318,11 +58333,11 @@ var render = function() {
                       on: {
                         click: function($event) {
                           $event.preventDefault()
-                          return _vm.toggleBlock($event)
+                          return _vm.block($event)
                         }
                       }
                     },
-                    [_vm._v("Unblock")]
+                    [_vm._v("Block")]
                   ),
               _vm._v(" "),
               _c(
@@ -58417,7 +58432,7 @@ var render = function() {
             attrs: {
               type: "text",
               placeholder: "Enter message",
-              disabled: _vm.session_block
+              disabled: this.user.session.blocked
             },
             domProps: { value: _vm.message },
             on: {

@@ -3,6 +3,12 @@
         <div class="card-header d-flex flex-row justify-content-between">
             <p :class="{'text-danger': this.user.session.blocked}">
                 <span>{{user.name}}</span>
+                <span class="text-success" v-show="isTyping"">
+                    <i class="fas fa-pencil-alt"></i>
+                    <i >
+                        is typing ...
+                    </i>
+                </span>
                 <b v-if="this.user.session.blocked">(Blocked)</b>
             </p>
             <div class="actions">
@@ -40,7 +46,7 @@
         <form class="card-footer" @submit.prevent="send">
             <div class="form-group">
                 <input type="text" v-model="message" class="form-control" placeholder="Enter message"
-                       :disabled="this.user.session.blocked">
+                       :disabled="this.user.session.blocked == true">
             </div>
         </form>
     </div>
@@ -55,6 +61,7 @@
             return {
                 messages: [],
                 message: '',
+                isTyping: false
             }
         },
         computed: {
@@ -94,13 +101,14 @@
               axios.post(`/session/${this.user.session.id}/block`)
                   .then(res=> {
                     this.user.session.blocked = true
+                    this.user.session.blocked_id = auth.id
                   })
             },
             unblock() {
                 axios.post(`/session/${this.user.session.id}/unblock`)
                     .then(res=> {
                         this.user.session.blocked = false
-
+                      this.user.session.blocked_id = null
                     })
             },
             getMessages: function () {
@@ -115,6 +123,17 @@
                         console.log(data);
                     })
             }
+        },
+        watch:{
+         message (value){
+           if(value) {
+             console.log(value);
+             Echo.private(`Chat.${this.user.session.id}`)
+               .whisper('typing', {
+                    name: auth.name
+               })
+           }
+          }
         },
         created() {
             this.read()
@@ -131,6 +150,15 @@
                         })
                     }
                 )
+              .listen('BlockEvent', ev => {
+                 ev.blocked ? this.user.session.blocked = true : this.user.session.blocked = false
+              })
+              .listenForWhisper('typing', ev => {
+                this.isTyping = true
+                setTimeout(()=>{
+                  this.isTyping = false
+                }, 2000)
+              })
         }
     }
 </script>

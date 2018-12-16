@@ -57876,7 +57876,7 @@ exports = module.exports = __webpack_require__(11)(false);
 
 
 // module
-exports.push([module.i, "\n.online{\n    margin-top: 5px;\n    height: 10px;\n    width: 10px;\n    margin-top: 5px;\n    display: block;\n    border-radius: 50%;\n    background-color: green;\n}\n.info{\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    -webkit-box-align: start;\n        -ms-flex-align: start;\n            align-items: flex-start;\n}\n", ""]);
+exports.push([module.i, "\n.online {\n    margin-top: 5px;\n    height: 10px;\n    width: 10px;\n    margin-top: 5px;\n    display: block;\n    border-radius: 50%;\n    background-color: green;\n}\n.info {\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    -webkit-box-align: start;\n        -ms-flex-align: start;\n            align-items: flex-start;\n}\n", ""]);
 
 // exports
 
@@ -57955,92 +57955,95 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-    components: {
-        'message-component': __WEBPACK_IMPORTED_MODULE_0__MessageComponent___default.a
+  components: {
+    'message-component': __WEBPACK_IMPORTED_MODULE_0__MessageComponent___default.a
+  },
+  data: function data() {
+    return {
+      open: true,
+      users: []
+    };
+  },
+
+  methods: {
+    hasUnread: function hasUnread(user) {
+      return user.session && user.session.unread_count != 0;
     },
-    data: function data() {
-        return {
-            open: true,
-            users: []
-        };
+    closeChat: function closeChat(user) {
+      user.session.open = false;
     },
-
-    methods: {
-        hasUnread: function hasUnread(user) {
-            return user.session && user.session.unread_count != 0;
-        },
-        closeChat: function closeChat(user) {
-            user.session.open = false;
-        },
-        openChat: function openChat(user) {
-            if (user.session) {
-                this.users.forEach(function (u) {
-                    if (u.session) {
-                        u.session.open = false;
-                    }
-                });
-                user.session.unread_count = 0;
-                user.session.open = true;
-            } else {
-                this.createSession(user);
-            }
-        },
-        createSession: function createSession(user) {
-            axios.post('/session/create', { user_id: user.id }).then(function (_ref) {
-                var data = _ref.data;
-
-                user.session = data.data;
-                user.session.open = true;
-            });
-        },
-        listenForEverySession: function listenForEverySession(user) {
-            Echo.private('Chat.' + user.session.id).listen('PrivateChannelEvent', function (ev) {
-                console.log('got ' + ev + " count :" + user.session.unread_count);
-                user.session.open ? "" : user.session.unread_count++;
-                console.log('new count ' + user.session.unread_count);
-            });
-        }
+    openChat: function openChat(user) {
+      if (user.session) {
+        this.users.forEach(function (u) {
+          if (u.session) {
+            u.session.open = false;
+          }
+        });
+        user.session.unread_count = 0;
+        user.session.open = true;
+      } else {
+        this.createSession(user);
+      }
     },
-    created: function created() {
-        var _this = this;
+    createSession: function createSession(user) {
+      axios.post('/session/create', { user_id: user.id }).then(function (_ref) {
+        var data = _ref.data;
 
-        axios.post('/get-friends').then(function (_ref2) {
-            var data = _ref2.data;
-
-            _this.users = data.data;
-            _this.users.forEach(function (user) {
-                if (user.session) {
-                    _this.listenForEverySession(user);
-                }
-            });
-        });
-
-        Echo.join('Chat').here(function (users) {
-            users.forEach(function (user) {
-                _this.users.forEach(function (u) {
-                    u.id == user.id ? u.online = true : "";
-                });
-            });
-        }).joining(function (user) {
-            _this.users.forEach(function (u) {
-                u.id === user.id ? u.online = true : u.online = false;
-            });
-        }).leaving(function (user) {
-            _this.users.forEach(function (u) {
-                u.id === user.id ? u.online = false : '';
-            });
-        });
-        Echo.channel('Chat').listen('SessionEvent', function (ev) {
-            var user = _this.users.find(function (user) {
-                return user.id == ev.session_by.id;
-            });
-            user.session = ev.session;
-            _this.listenForEverySession(user);
-        });
+        user.session = data.data;
+        user.session.open = true;
+      });
+    },
+    listenForEverySession: function listenForEverySession(user) {
+      Echo.private('Chat.' + user.session.id).listen('PrivateChannelEvent', function (ev) {
+        console.log('got ' + ev + ' count :' + user.session.unread_count);
+        user.session.open ? '' : user.session.unread_count++;
+        console.log('new count ' + user.session.unread_count);
+      });
     }
+  },
+  created: function created() {
+    var _this = this;
+
+    axios.post('/get-friends').then(function (_ref2) {
+      var data = _ref2.data;
+
+      _this.users = data.data;
+      _this.users.forEach(function (user) {
+        if (user.session) {
+          _this.listenForEverySession(user);
+        }
+      });
+    });
+
+    Echo.join('Chat').here(function (users) {
+      users.forEach(function (user) {
+        _this.users.forEach(function (u) {
+          u.id == user.id ? u.online = true : '';
+        });
+      });
+    }).joining(function (user) {
+      _this.users.forEach(function (u) {
+        u.id === user.id ? u.online = true : u.online = false;
+      });
+    }).leaving(function (user) {
+      _this.users.forEach(function (u) {
+        u.id === user.id ? u.online = false : '';
+      });
+    });
+    Echo.channel('Chat').listen('SessionEvent', function (ev) {
+      var user = _this.users.find(function (user) {
+        return user.id == ev.session_by.id;
+      });
+      user.session = ev.session;
+      _this.listenForEverySession(user);
+    });
+  }
 });
 
 /***/ }),
@@ -58188,13 +58191,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['user'],
     data: function data() {
         return {
             messages: [],
-            message: ''
+            message: '',
+            isTyping: false
         };
     },
 
@@ -58238,6 +58248,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             axios.post('/session/' + this.user.session.id + '/block').then(function (res) {
                 _this3.user.session.blocked = true;
+                _this3.user.session.blocked_id = auth.id;
             });
         },
         unblock: function unblock() {
@@ -58245,6 +58256,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             axios.post('/session/' + this.user.session.id + '/unblock').then(function (res) {
                 _this4.user.session.blocked = false;
+                _this4.user.session.blocked_id = null;
             });
         },
 
@@ -58265,6 +58277,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             });
         }
     },
+    watch: {
+        message: function message(value) {
+            if (value) {
+                console.log(value);
+                Echo.private('Chat.' + this.user.session.id).whisper('typing', {
+                    name: auth.name
+                });
+            }
+        }
+    },
     created: function created() {
         var _this6 = this;
 
@@ -58277,6 +58299,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             _this6.messages.forEach(function (message) {
                 message.id == ev.chat.id ? message.read_at = ev.chat.read_at : "";
             });
+        }).listen('BlockEvent', function (ev) {
+            ev.blocked ? _this6.user.session.blocked = true : _this6.user.session.blocked = false;
+        }).listenForWhisper('typing', function (ev) {
+            _this6.isTyping = true;
+            setTimeout(function () {
+                _this6.isTyping = false;
+            }, 2000);
         });
     }
 });
@@ -58296,6 +58325,28 @@ var render = function() {
       [
         _c("p", { class: { "text-danger": this.user.session.blocked } }, [
           _c("span", [_vm._v(_vm._s(_vm.user.name))]),
+          _vm._v(" "),
+          _c(
+            "span",
+            {
+              directives: [
+                {
+                  name: "show",
+                  rawName: "v-show",
+                  value: _vm.isTyping,
+                  expression: "isTyping"
+                }
+              ],
+              staticClass: "text-success"
+            },
+            [
+              _c("i", { staticClass: "fas fa-pencil-alt" }),
+              _vm._v(" "),
+              _c("i", [
+                _vm._v("\n                    is typing ...\n                ")
+              ])
+            ]
+          ),
           _vm._v(" "),
           this.user.session.blocked ? _c("b", [_vm._v("(Blocked)")]) : _vm._e()
         ]),
@@ -58432,7 +58483,7 @@ var render = function() {
             attrs: {
               type: "text",
               placeholder: "Enter message",
-              disabled: this.user.session.blocked
+              disabled: this.user.session.blocked == true
             },
             domProps: { value: _vm.message },
             on: {
